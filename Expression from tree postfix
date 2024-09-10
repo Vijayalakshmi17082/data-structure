@@ -1,0 +1,85 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <ctype.h>
+#include <string.h>
+#include <math.h>
+
+#define MAX 100
+
+typedef struct Node {
+    char value;          
+    struct Node *left;   
+    struct Node *right;  
+} Node;
+Node* createNode(char value) {
+    Node *newNode = (Node*)malloc(sizeof(Node));
+    newNode->value = value;
+    newNode->left = NULL;
+    newNode->right = NULL;
+    return newNode;
+}
+int isOperator(char ch) {
+    return ch == '+' || ch == '-' || ch == '*' || ch == '/';
+}
+Node* buildExpressionTree(char *postfix) {
+    Node *stack[MAX];
+    int top = -1;
+
+    for (int i = 0; postfix[i] != '\0'; i++) {
+        char ch = postfix[i];
+
+        if (isdigit(ch)) {
+            Node *node = createNode(ch);
+            stack[++top] = node;
+        } else if (isOperator(ch)) {
+            Node *node = createNode(ch);
+            node->right = stack[top--];
+            node->left = stack[top--];
+            stack[++top] = node;
+        }
+    }
+
+    return stack[top];
+}
+int evaluate(Node *root) {
+    if (root == NULL) {
+        return 0;
+    }
+    
+    if (!isOperator(root->value)) {
+        return root->value - '0'; // Convert char to int
+    }
+
+    int leftEval = evaluate(root->left);
+    int rightEval = evaluate(root->right);
+
+    switch (root->value) {
+        case '+': return leftEval + rightEval;
+        case '-': return leftEval - rightEval;
+        case '*': return leftEval * rightEval;
+        case '/': return leftEval / rightEval;
+    }
+
+    return 0;
+}
+void freeTree(Node *root) {
+    if (root != NULL) {
+        freeTree(root->left);
+        freeTree(root->right);
+        free(root);
+    }
+}
+
+int main() {
+    char postfix[MAX];
+    
+    printf("Enter postfix expression: ");
+    scanf("%s", postfix);
+
+    Node *root = buildExpressionTree(postfix);
+    
+    printf("Result of the expression: %d\n", evaluate(root));
+
+    freeTree(root);
+    return 0;
+}
