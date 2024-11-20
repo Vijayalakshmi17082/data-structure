@@ -1,0 +1,63 @@
+nt mod(int x){
+  if(x<0) return -1*x;
+  return x;
+}
+
+int manhattandistance(int** points, int i, int j, int* pointsColSize){
+  int* p1 = *(points + i);
+  int* p2 = *(points + j);
+  int distance = 0;
+  for(int k = 0; k<(*pointsColSize); k++){
+    distance = distance + mod(*(p1 + k) - *(p2 + k));
+  }
+  return distance;
+}
+
+int minCostConnectPoints(int** points, int pointsSize, int* pointsColSize){
+    int distance = 0; //the final cost
+    int mindist; 
+    int dist;
+    // the set S (contains the vertices of the MST)
+    int S[pointsSize];
+    int top = 0;
+    int present[pointsSize]; //array that marks the presence of vertices contained in S
+    int v2; //vertex, used with 'mindist' to add to S
+    int edges[pointsSize]; //the minimum distance to vertices(outside S) from vertices inside S.
+    for(int j = 0; j<pointsSize; j++){
+        edges[j] = 2147483646;
+        present[j] = 0; //not present
+    }
+    edges[0] = 1;
+
+    S[top] = 0; //adding the first element to set S
+    top++;
+    present[0] = 1;
+    // int i = 0;
+    while(top!=pointsSize){
+        for(int j= 1; j<pointsSize; j++){
+            //skip, j already present
+            if(present[j] == 1) continue;
+
+            dist = manhattandistance(points, S[top-1],j, pointsColSize);
+
+            if(edges[j]>dist){
+                edges[j] = dist;
+            }
+        }
+
+        mindist = 2147483647;
+        for(int i = 0; i<pointsSize; i++){
+            if(present[i] == 1) continue;
+            if(edges[i] < mindist){
+                mindist = edges[i];
+                v2 = i;
+            }
+        }
+        S[top] = v2;
+        top++;
+        present[v2] = 1;
+        distance = distance+mindist;
+    }
+    
+    return distance;
+}
